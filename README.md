@@ -6,21 +6,6 @@ WARNING!!!!!
 
 Project in Alpha unstable release!!!
 
-## Project Structure
-
-The main folder structure looks like this:
-
-src/
-├─ img/ # Input images organized in layers
-│ ├─ 01 "Name whatever you want"/
-│ │ ├─ "Name whatever you want"/ # Version of the character model, like a RPG Maker
-│ │ └─ ...
-│ ├─ 02 "Name whatever you want"/
-│ │ ├─ "Name whatever you want"/
-│ │ └─ ...
-│ └─ ...
-├─ Result/ # Generated character images will be saved here
-
 ### How it Works
 
 1. Each folder inside `src/img` represents a "layer".  
