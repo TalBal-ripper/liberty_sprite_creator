@@ -38,6 +38,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           mkdir -p release/src/img
+          mkdir -p release/src/Result
           cp -r src/img/* release/src/img/
           cp target/${{ matrix.target }}/release/${{ matrix.artifact_name }} release/
           cd release
@@ -48,6 +49,7 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path release/src/img
+          New-Item -ItemType Directory -Force -Path release/src/Result
           Copy-Item -Recurse -Path src/img/* -Destination release/src/img/
           Copy-Item target/${{ matrix.target }}/release/${{ matrix.artifact_name }} release/
           Compress-Archive -Path release/* -DestinationPath ${{ matrix.archive_name }}
@@ -63,6 +65,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
 
     steps:
       - name: Download all artifacts
