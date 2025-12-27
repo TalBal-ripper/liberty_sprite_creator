@@ -1,71 +1,80 @@
-name: Build and Release
+name: Release
 
 on:
   push:
     tags:
       - "v*.*.*"
+  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        target: [x86_64-unknown-linux-gnu, x86_64-pc-windows-gnu]
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact_name: liberty_sprite_creator
+            archive_name: liberty_sprite_creator-linux-x64.tar.gz
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: liberty_sprite_creator.exe
+            archive_name: liberty_sprite_creator-windows-x64.zip
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Set up Rust
-        uses: actions-rs/toolchain@v1
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          target: ${{ matrix.target }}
-          override: true
-
-      - name: Install mingw for Windows
-        if: matrix.target == 'x86_64-pc-windows-gnu'
-        run: sudo apt-get install -y mingw-w64
+          targets: ${{ matrix.target }}
 
       - name: Build release
         run: cargo build --release --target ${{ matrix.target }}
 
-      - name: Prepare package
+      - name: Prepare release directory (Linux)
+        if: runner.os == 'Linux'
         run: |
-          mkdir package
-          mkdir package/src
-          cp -r src/img package/src/
-          cp src/lib.rs package/src/ 2>/dev/null || true
-          find src -maxdepth 1 -type f ! -name "main.rs" ! -name "lib.rs" -exec cp {} package/src/ \;
+          mkdir -p release/src/img
+          cp -r src/img/* release/src/img/
+          cp target/${{ matrix.target }}/release/${{ matrix.artifact_name }} release/
+          cd release
+          tar -czf ../${{ matrix.archive_name }} .
 
-          if [[ "${{ matrix.target }}" == "x86_64-unknown-linux-gnu" ]]; then
-              cp target/${{ matrix.target }}/release/liberty_sprite_creator package/liberty_sprite_creator
-              tar -czvf liberty_sprite_creator-linux.tar.gz -C package .
-          else
-              cp target/${{ matrix.target }}/release/liberty_sprite_creator.exe package/liberty_sprite_creator.exe
-              zip -r liberty_sprite_creator-windows.zip package/*
-          fi
+      - name: Prepare release directory (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path release/src/img
+          Copy-Item -Recurse -Path src/img/* -Destination release/src/img/
+          Copy-Item target/${{ matrix.target }}/release/${{ matrix.artifact_name }} release/
+          Compress-Archive -Path release/* -DestinationPath ${{ matrix.archive_name }}
 
-      - name: Upload Release Artifact
-        uses: actions/upload-artifact@v3
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target }}
-          path: |
-            liberty_sprite_creator-linux.tar.gz
-            liberty_sprite_creator-windows.zip
+          path: ${{ matrix.archive_name }}
 
   release:
+    name: Create Release
     needs: build
     runs-on: ubuntu-latest
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v3
-        with:
-          path: ./release_files
+    if: startsWith(github.ref, 'refs/tags/')
 
-      - name: Create GitHub Release
-        uses: ncipollo/release-action@v1
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
         with:
-          tag: ${{ github.ref_name }}
-          files: ./release_files/*
+          files: |
+            x86_64-unknown-linux-gnu/*.tar.gz
+            x86_64-pc-windows-msvc/*.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
