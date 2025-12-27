@@ -1,6 +1,6 @@
 # Liberty Sprite Creator
 
-Liberty Character Generator is a flexible tool to create your own characters using layered images. You have full control over layers, versions, and folder organization.  
+Liberty Sprite Creator is a flexible tool to create your own characters (like in RPG Maker) using layered images. You have full control over layers, versions of RPG Maker, and folder organization.  
 
 WARNING!!!!!
 
