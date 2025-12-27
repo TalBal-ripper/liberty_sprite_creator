@@ -1,2 +1,4 @@
 pub mod app;
-pub mod enum_and_struct;
+pub mod messages;
+pub mod state;
+pub mod views;

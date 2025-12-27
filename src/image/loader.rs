@@ -1,19 +1,7 @@
+use super::types::{ChildDir, ParentDir};
 use std::collections::HashSet;
 use std::fs;
 use std::io;
-use std::path::PathBuf;
-
-#[derive(Debug)]
-pub struct ParentDir {
-    pub name: String,
-    pub children: Vec<ChildDir>,
-}
-
-#[derive(Debug)]
-pub struct ChildDir {
-    pub name: String,
-    pub files: Vec<PathBuf>,
-}
 
 pub fn get_path() -> io::Result<Vec<ParentDir>> {
     let mut result = Vec::new();
@@ -70,6 +58,7 @@ pub fn get_path() -> io::Result<Vec<ParentDir>> {
             children,
         });
     }
+
     Ok(result)
 }
 
@@ -90,6 +79,7 @@ pub fn get_parents() -> Result<Vec<String>, std::io::Error> {
     Ok(parents)
 }
 
+#[allow(dead_code)]
 pub fn get_img() -> Result<Vec<String>, std::io::Error> {
     let data = get_path()?;
 

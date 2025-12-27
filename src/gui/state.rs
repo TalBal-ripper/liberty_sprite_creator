@@ -1,4 +1,4 @@
-use crate::img_output::img_render::ImgCache;
+use crate::image::cache::ImgCache;
 
 pub struct App {
     pub vec_of_widgets: Vec<(iced::widget::image::Handle, String)>,
@@ -8,12 +8,4 @@ pub struct App {
     pub img_cache: ImgCache,
     pub vec_of_img: Vec<Option<String>>,
     pub result: image::ImageBuffer<image::Rgba<u8>, Vec<u8>>,
-}
-
-#[derive(Debug, Clone)]
-pub enum Message {
-    ParentButtonClicked((String, u8)),
-    ChildRadioClicked((String, usize)),
-    ImgClicked(String),
-    ResultButtonClicked(),
 }

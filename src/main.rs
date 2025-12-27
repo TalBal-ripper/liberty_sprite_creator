@@ -1,6 +1,8 @@
 mod gui;
-mod img_output;
+mod image;
 
 fn main() {
-    gui::app::run_gui();
+    if let Err(e) = gui::app::run_gui() {
+        eprintln!("Error running GUI: {}", e);
+    }
 }
