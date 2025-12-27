@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: Linux_x86_64
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
@@ -31,17 +31,20 @@ jobs:
       - name: Build release
         run: cargo build --release --target ${{ matrix.target }}
 
-      - name: Package artifacts
+      - name: Prepare package
         run: |
           mkdir package
-          cp -r src package/
+          mkdir package/src
+          cp -r src/img package/src/
+          cp src/lib.rs package/src/ 2>/dev/null || true
+          find src -maxdepth 1 -type f ! -name "main.rs" ! -name "lib.rs" -exec cp {} package/src/ \;
 
           if [[ "${{ matrix.target }}" == "x86_64-unknown-linux-gnu" ]]; then
-            cp target/${{ matrix.target }}/release/liberty_sprite_creator package/
-            tar -czvf liberty_sprite_creator-linux.tar.gz -C package .
+              cp target/${{ matrix.target }}/release/liberty_sprite_creator package/liberty_sprite_creator
+              tar -czvf liberty_sprite_creator-linux.tar.gz -C package .
           else
-            cp target/${{ matrix.target }}/release/liberty_sprite_creator.exe package/
-            zip -r liberty_sprite_creator-windows.zip package
+              cp target/${{ matrix.target }}/release/liberty_sprite_creator.exe package/liberty_sprite_creator.exe
+              zip -r liberty_sprite_creator-windows.zip package/*
           fi
 
       - name: Upload Release Artifact
@@ -54,7 +57,7 @@ jobs:
 
   release:
     needs: build
-    runs-on: Linux_x86_64
+    runs-on: ubuntu-latest
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
