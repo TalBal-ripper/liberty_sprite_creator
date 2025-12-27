@@ -1,0 +1,68 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build:
+    runs-on: Linux_x86_64
+
+    strategy:
+      matrix:
+        target: [x86_64-unknown-linux-gnu, x86_64-pc-windows-gnu]
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.target }}
+          override: true
+
+      - name: Install mingw for Windows
+        if: matrix.target == 'x86_64-pc-windows-gnu'
+        run: sudo apt-get install -y mingw-w64
+
+      - name: Build release
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Package artifacts
+        run: |
+          mkdir package
+          cp -r src package/
+
+          if [[ "${{ matrix.target }}" == "x86_64-unknown-linux-gnu" ]]; then
+            cp target/${{ matrix.target }}/release/liberty_sprite_creator package/
+            tar -czvf liberty_sprite_creator-linux.tar.gz -C package .
+          else
+            cp target/${{ matrix.target }}/release/liberty_sprite_creator.exe package/
+            zip -r liberty_sprite_creator-windows.zip package
+          fi
+
+      - name: Upload Release Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.target }}
+          path: |
+            liberty_sprite_creator-linux.tar.gz
+            liberty_sprite_creator-windows.zip
+
+  release:
+    needs: build
+    runs-on: Linux_x86_64
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: ./release_files
+
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.ref_name }}
+          files: ./release_files/*
