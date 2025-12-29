@@ -6,6 +6,10 @@ WARNING!!!!!
 
 Project in Alpha unstable release!!!
 
+## Screenshot
+
+![Main Interface](screenshots/Main.png)
+
 ### How it Works
 
 1. Each folder inside `src/img` represents a "layer".  
@@ -37,3 +41,8 @@ Just use this:
 1. Prepare your image layers in `src/img`.  
 2. Make sure each layer has a corresponding version folder.  
 3. Run the program and check `src/Result` for your generated character.
+
+## License
+GPL-3.0
+## Credits
+Looseleaf - Mack
