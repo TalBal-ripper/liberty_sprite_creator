@@ -21,6 +21,7 @@ impl Sandbox for App {
             vec_of_img: vec![None; loader::get_parents().unwrap().len()],
             selected_parent_id: 0,
             result: image::ImageBuffer::new(0, 0),
+            name_result: String::new(),
         }
     }
 
@@ -63,8 +64,13 @@ impl Sandbox for App {
             }
 
             Message::ResultButtonClicked => {
-                processor::save_result(&self.result, "./src/Result/output.png");
+                processor::save_result(
+                    &self.result,
+                    &("./src/Result/".to_owned() + self.name_result.as_str() + ".png"),
+                );
             }
+
+            Message::InputOfImageName(val) => self.name_result = val,
         }
     }
 

@@ -8,4 +8,5 @@ pub struct App {
     pub img_cache: ImgCache,
     pub vec_of_img: Vec<Option<String>>,
     pub result: image::ImageBuffer<image::Rgba<u8>, Vec<u8>>,
+    pub name_result: String,
 }

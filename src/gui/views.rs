@@ -2,7 +2,7 @@ use super::messages::Message;
 use super::state::App;
 use crate::image::loader;
 use iced::widget::scrollable::{Direction, Properties};
-use iced::widget::{button, column, container, row, scrollable, text};
+use iced::widget::{button, column, container, row, scrollable, text, text_input};
 use iced::{Element, Length};
 
 impl App {
@@ -91,9 +91,13 @@ impl App {
     }
 
     fn build_bottom_bar(&self) -> Element<'_, Message> {
-        row![button(text("Blend")).on_press(Message::ResultButtonClicked)]
-            .spacing(10)
-            .padding(10)
-            .into()
+        row![
+            text_input("Type name of result image", &self.name_result)
+                .on_input(Message::InputOfImageName),
+            button(text("Blend")).on_press(Message::ResultButtonClicked)
+        ]
+        .spacing(10)
+        .padding(10)
+        .into()
     }
 }

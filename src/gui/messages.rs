@@ -4,4 +4,5 @@ pub enum Message {
     ChildRadioClicked((String, usize)),
     ImgClicked(String),
     ResultButtonClicked,
+    InputOfImageName(String),
 }
